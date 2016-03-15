@@ -8,6 +8,7 @@ int leitura[12];
 // Pega o id leitor
 char comando_LeituraTag[] = { 0xAA , 0x00, 0x03, 0x25, 0x26, 0x00, 0x00, 0xBB };
 int tagValida1[4] = {135, 80, 114, 203};
+int anterior[4] = {0, 0, 0, 0};
 
 
 void setup()
@@ -35,16 +36,30 @@ void loop()
 
   if (verificaTagValida() == true) {
     // Retira apenas os Bytes com o ID dos tag
-    for (j = 5; j < 9; j++) { 
-      Serial.print(leitura[j], HEX);
-      //Serial.print(" - ");
-      //Serial.println(leitura[j]);
+    if (estaPressionado() == false) {
+      for (j = 5; j < 9; j++) { 
+        int i = j - 5;
+        
+        anterior[i] = leitura[j];
+        Serial.print(leitura[j], HEX);
+        //Serial.print(" - ");
+        //Serial.println(leitura[j]);
+      }
+      
+      Serial.println("\nEstá em cima do leitor \n ------------------------------------------");
     }
-    Serial.println();
+  } else {
+    
+    // Reseta o anterior
+    anterior[0] = -1;
+    anterior[1] = -1;
+    anterior[2] = -1;
+    anterior[3] = -1;
+    
   }
     
 
-  // Envia comando para leitura do tag
+  // Envia comando para leitura do tag1
   for (j = 0; j < 8; j++) 
     mySerial.write(comando_LeituraTag[j]);
 
@@ -52,11 +67,11 @@ void loop()
   for (j = 0; j < 12; j++)
     leitura[j] = 0;
     
-  //Serial.println("");
 }
 
 // Verifica se a tag é valida   
 bool verificaTagValida() {
+  
   // Compara se existe alguma tag que estamos procurando
   for (int j = 5; j < 9; j++) {
     int i = j - 5;
@@ -65,7 +80,22 @@ bool verificaTagValida() {
       return false;
     }
   }
-
+  
   return true;
 }
+
+
+bool estaPressionado() {
+  // Compara se existe alguma tag que estamos procurando
+  for (int j = 5; j < 9; j++) {
+    int i = j - 5;
+    
+    if (leitura[j] == anterior[i]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 

@@ -3,33 +3,26 @@
 SoftwareSerial mySerial(2, 3);
 const int ledPin = 7;
 
-
 //MF_READ - Código para leitura
 byte MF_GET_SNR[15] = {0XAA, 0X00, 0X0A, 0X20, 0X01, 0X01, 0X10, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0x3A, 0XBB};
 
 // PARA ESCREVER 0FFFFF NA TAG
-//byte MF_GET_SNR[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0X2B, 0XBB}; //MF_WRITE 16 F (A)
+//byte MF_WRITE_1[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0X2B, 0XBB}; //MF_WRITE 16 F (A)
 
 // PARA ESCREVER 0FFFF1 NA TAG 
-//byte MF_GET_SNR[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0X11, 0X11, 0X2B, 0XBB}; //MF_WRITE 14F 11 11 (B)
+//byte MF_WRITE_2[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF, 0X11, 0X11, 0X2B, 0XBB}; //MF_WRITE 14F 11 11 (B)
 
 // PARA ESCREVER 000000 NA TAG
-//byte MF_GET_SNR[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X2B, 0XBB}; //MF_WRITE 16 zeros (C)
+//byte MF_WRITE_3[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X2B, 0XBB}; //MF_WRITE 16 zeros (C)
 
 // PARA ESCREVER 0000001 NA TAG
-//byte MF_GET_SNR[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X11, 0X11, 0X2B, 0XBB}; //MF_WRITE 14 zeros 11 11 (D)
-
+//byte MF_WRITE_4[31] = {0XAA, 0X00, 0X1A, 0X21, 0X01, 0X01, 0X10, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0Xff, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X11, 0X11, 0X2B, 0XBB}; //MF_WRITE 14 zeros 11 11 (D)
 
 // Texto que será escrito o rfid_leitura
 String rfid_leitura;
 
 // Grava a leitura anterior para comparar
 String rfid_anterior;
-
-
-// Verifica se está debug
-boolean debugging;
-
 
 void setup() {
   // Inicializa todos os seriais
@@ -39,7 +32,6 @@ void setup() {
   mySerial.begin(9600);
 
   // Debug 
-  debugging = true; 
   Serial.println("SKETCH ABERTO");
   
   // Ativa o Botão 
@@ -50,7 +42,12 @@ void setup() {
 }
 
 void loop() {
-  // Escreve no modulo rfid, o comando de leitura
+  modoLeituraRFID();
+  //modoEscritaRFID(MF_WRITE_3);
+}
+
+void modoLeituraRFID() {
+    // Escreve no modulo rfid, o comando de leitura
   mySerial.write(MF_GET_SNR, sizeof(MF_GET_SNR));
   delay(150); // Delay 
 
@@ -59,7 +56,7 @@ void loop() {
 
   // Enquanto o modulo estiver livre
   while(mySerial.available() > 0) {
-      
+    
       // Leitura dos dados rfid
       int x = mySerial.read();
     
@@ -85,50 +82,42 @@ void loop() {
       }  
   }
 
-  // 
+  // Valida os RFID's
   if (rfid_leitura == "0FFFFF"){         // 1
-      if (rfid_anterior != "0FFFFF") {
-        if(debugging)  {
-          rfid_anterior = rfid_leitura;
-          Serial.println("id01"); 
-          Serial.println(rfid_leitura);
-          digitalWrite(ledPin, 1);
-        }
-        else Serial.write(1);
-      }
+      validaRFID("01","0FFFFF", 1);
   } else if (rfid_leitura == "0FFFF1") { // 2
-      if (rfid_anterior != "0FFFF1") {
-        if(debugging){ 
-          rfid_anterior = rfid_leitura;          
-          Serial.println("id02"); 
-          Serial.println(rfid_leitura);
-          digitalWrite(ledPin, 1);
-        }
-        else Serial.write(2);
-      }
+      validaRFID("01","0FFFF1", 2);
   } else if (rfid_leitura == "000000") { // 3
-      if (rfid_anterior != "000000") {
-        if(debugging) {
-          rfid_anterior = rfid_leitura;
-          Serial.println("id03"); 
-          Serial.println(rfid_leitura); 
-          digitalWrite(ledPin, 1);
-        }
-        else Serial.write(3);
-      }
+      validaRFID("01","000000", 3);
   } else if(rfid_leitura == "0000001"){  // 4
-      if (rfid_anterior != "0000001") {
-        if(debugging){
-          rfid_anterior = rfid_leitura;
-          Serial.println("id04"); 
-          Serial.println(rfid_leitura);    
-          digitalWrite(ledPin, 1);
-        }
-        else Serial.write(4);
-      }
-  }else {
+      validaRFID("01","0000001", 4);
+  } else {
+      if (rfid_anterior != "-1") {
         rfid_anterior = "-1";
+        Serial.println("NÃO ESTÁ PRESSIONANDO"); 
         digitalWrite(ledPin, 0);
+      }
   }
+}
+
+
+// Função que valida o RFID
+void validaRFID(String id_mesa, String rfid_leitura, int num_id) {
+  if (rfid_anterior != rfid_leitura) {
+    rfid_anterior = rfid_leitura;
+    Serial.println("mesa" + id_mesa + "|id" + num_id); 
+    Serial.println(rfid_leitura);
+    digitalWrite(ledPin, 1);
+  }
+}
+
+
+// Escreve valor no RFID
+void modoEscritaRFID(byte MF_WRITE[31]) {
+    Serial.println("ESCREVENDO NO RFID");
+    
+    mySerial.write(MF_WRITE, 31);
+    delay(200);
+    Serial.println("TERMINOU DE ESCREVER NO RFID");
 
 }
